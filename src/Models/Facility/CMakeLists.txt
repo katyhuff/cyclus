@@ -7,5 +7,6 @@ ADD_SUBDIRECTORY( SeparationsMatrixFacility )
 ADD_SUBDIRECTORY( SinkFacility )
 ADD_SUBDIRECTORY( StubFacility )
 ADD_SUBDIRECTORY( SourceFacility )
+ADD_SUBDIRECTORY( ToasterFacility )
 
 SET(ModelTestSource ${ModelTestSource} ${FacilityTestSource} PARENT_SCOPE)
