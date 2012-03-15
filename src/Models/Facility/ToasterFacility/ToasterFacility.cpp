@@ -5,7 +5,6 @@
 
 #include <list>
 #include "Logger.h"
-#include "CycException.h"
 #include "InputXML.h"
 
 using namespace std;
@@ -44,16 +43,17 @@ void ToasterFacility::init(xmlNodePtr cur) {
   allowed_levels.insert("dark");
   allowed_levels.insert("burnt");
   if(allowed_levels.find(toastiness_)==allowed_levels.end()){
-    string msg = "The value given for the darkenss parameter, ";
+    string msg = "The value given for the toastiness parameter, ";
     msg += toastiness_;
     msg += ", is not within the allowed set. Allowed values are: ";
     set<string>::iterator it;
     for (it=allowed_levels.begin(); it != allowed_levels.end(); it++){
-      msg += " ";
+      msg += " '";
       msg += (*it);
+      msg += "'";
     }
     msg+=".";
-    throw CycException(msg);
+    LOG(LEV_ERROR,"Toast")<<msg;
   }
 }
 
