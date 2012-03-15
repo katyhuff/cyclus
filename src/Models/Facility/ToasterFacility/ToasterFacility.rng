@@ -7,7 +7,7 @@ datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
     <element name="nSlices">
       <data type="nonNegativeInteger"/>
     </element>
-    <element name="darkness">
+    <element name="toastiness">
       <data type="string"/>
     </element>
     <element name="rate">

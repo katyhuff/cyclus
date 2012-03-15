@@ -24,8 +24,10 @@ ToasterFacility::~ToasterFacility() {};
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
 void ToasterFacility::init(xmlNodePtr cur) {
   FacilityModel::init(cur);
+
   /// move XML pointer to current model
   cur = XMLinput->get_xpath_element(cur,"model/ToasterFacility");
+
   /// initialize any ToasterFacility-specific datamembers here
   n_slices_ = strtol(XMLinput->get_xpath_content(cur, "rate"), NULL, 10);
   toastiness_ = XMLinput->get_xpath_content(cur,"toastiness");
