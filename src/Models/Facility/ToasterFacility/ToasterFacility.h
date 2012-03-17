@@ -4,6 +4,8 @@
 
 #include "Logger.h"
 #include "FacilityModel.h"
+#include "DeckStore.h"
+#include <deque>
 
 /**
   @class ToasterFacility
@@ -184,6 +186,30 @@ class ToasterFacility : public FacilityModel  {
    */
   std::string outcommodity_;
 
+  /**
+   * Not yet toasted bread in storage, waiting to be toasted
+   */
+  DeckStore stocks_;
+
+  /**
+   * Toasted bread, waiting to be offered and sent away
+   */
+  DeckStore inventory_;
+
+  /**
+   * Orders for toasted bread from other agents, waiting to be filled
+   */
+  std::deque<msg_ptr> orders_waiting_;
+
+  void makeRequests();
+
+  void makeOffers();
+
+  void toast(DeckStore to_toast);
+
+  void sendToast(std::deque<msg_ptr> orders);
+
+  void cleanUp();
 
 /* ------------------- */ 
 

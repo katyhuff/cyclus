@@ -6,7 +6,7 @@
 #include <list>
 #include "Logger.h"
 #include "InputXML.h"
-#include "DeckStore.h"
+#include "Timer.h"
 
 using namespace std;
 
@@ -134,9 +134,9 @@ void ToasterFacility::addResource(msg_ptr msg, vector<rsrc_ptr> manifest) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void ToasterFacility::handleTick(int time) {
-  request(incommodity_, storage_capacity_);
-  offerToast(TI->time_step_in_minutes_/rate_);
-  toast(stored_bread_);
+  makeRequests();
+  makeOffers();
+  toast(stocks_);
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -147,6 +147,30 @@ void ToasterFacility::handleTock(int time) {
 
 /* ------------------- */ 
 
+/* --------------------
+ * this ToasterFacility has these members
+ * --------------------
+ */
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void ToasterFacility::makeRequests() { 
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void ToasterFacility::makeOffers() { 
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void ToasterFacility::toast(DeckStore to_toast) { 
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void ToasterFacility::sendToast(std::deque<msg_ptr> orders) { 
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void ToasterFacility::cleanUp() { 
+}
 
 /* --------------------
  * all MODEL classes have these members
