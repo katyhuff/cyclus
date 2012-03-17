@@ -6,6 +6,7 @@
 #include <list>
 #include "Logger.h"
 #include "InputXML.h"
+#include "DeckStore.h"
 
 using namespace std;
 
