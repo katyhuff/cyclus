@@ -60,6 +60,11 @@ void ToasterFacility::init(xmlNodePtr cur) {
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
 void ToasterFacility::copy(ToasterFacility* src) {
   FacilityModel::copy(src);
+  n_slices_=src->n_slices_;
+  toastiness_=src->toastiness_;
+  rate_=src->rate_;
+  incommodity_=src->incommodity_;
+  outcommodity_=src->outcommodity_;
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
@@ -70,6 +75,12 @@ void ToasterFacility::copyFreshModel(Model* src) {
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
 void ToasterFacility::print() {
   FacilityModel::print();
+  string msg = "ToasterFacility";
+  msg += this->ID();
+  msg += " makes delicious ";
+  msg += toastiness_;
+  msg += " toast.";
+  LOG(LEV_DEBUG2,"Toast")<<msg;
 };
 
 /* ------------------- */ 
@@ -81,7 +92,9 @@ void ToasterFacility::print() {
  */
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-void ToasterFacility::receiveMessage(msg_ptr msg) {}
+void ToasterFacility::receiveMessage(msg_ptr msg) {
+  orders_waiting_.push_front(msg);
+}
 
 /* ------------------- */ 
 
@@ -92,16 +105,44 @@ void ToasterFacility::receiveMessage(msg_ptr msg) {}
  */
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-vector<rsrc_ptr> ToasterFacility::removeResource(msg_ptr order) {}
+vector<rsrc_ptr> ToasterFacility::removeResource(msg_ptr order) {
+  Transaction trans = order->trans();
+  if (trans.commod != outcommodity_) {
+    string err_msg = "ToasterFacility can only send '" + outcommodity_ ;
+    err_msg += + "' materials.";
+    throw CycException(err_msg);
+  }
+
+  MatManifest materials;
+  try {
+    materials = inventory_.popQty(trans.resource->quantity());
+  } catch(CycNegQtyException err) {
+    LOG(LEV_ERROR, "Toast") << "extraction of " << trans.resource->quantity()
+                   << " kg failed. Inventory is only "
+                   << inventory_.quantity() << " kg.";
+  }
+
+  return MatStore::toRes(materials);
+
+}
     
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-void ToasterFacility::addResource(msg_ptr msg, vector<rsrc_ptr> manifest){}
+void ToasterFacility::addResource(msg_ptr msg, vector<rsrc_ptr> manifest) {
+  stocks_.pushAll(MatStore::toMat(manifest));
+}
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-void ToasterFacility::handleTick(int time){}
+void ToasterFacility::handleTick(int time) {
+  request(incommodity_, storage_capacity_);
+  offerToast(TI->time_step_in_minutes_/rate_);
+  toast(stored_bread_);
+}
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-void ToasterFacility::handleTock(int time){}
+void ToasterFacility::handleTock(int time) {
+  sendToast(orders_waiting_);
+  cleanUp();
+}
 
 /* ------------------- */ 
 
