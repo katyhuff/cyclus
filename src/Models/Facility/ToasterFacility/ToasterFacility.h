@@ -204,24 +204,66 @@ class ToasterFacility : public FacilityModel  {
    */
   std::deque<msg_ptr> orders_waiting_;
 
+  /**
+   * A map of names to percent toasted for each allowed level of toastiness.
+   */
   std::map<std::string, double> allowed_levels_;
 
+  /**
+   * A map from atomic number to ratio of elemental composition in toast vs 
+   * bread.
+   */
   std::map<int, double> toast_bread_elt_ratio_;
 
+  /**
+   * A map from isotope number to toastiness-scaled composition change
+   */
   std::map<int, double> comp_change_;
 
+  /**
+   * A function in which the incommodity is requested at the proper rate.
+   */
   void makeRequests();
 
+  /** 
+   * A function which offers the available toast in the inventory plus any toast 
+   * that can still be toasted this timestep.
+   */
   void makeOffers();
 
+  /**
+   * Accepts a DeckStore of materials to toast and returns a vector of toasted 
+   * materials. One to one.
+   *
+   * @param to_toast is the DeckStore of materials to toast
+   * @return a vector of toasted materials
+   */
   std::vector<mat_rsrc_ptr> toast(DeckStore to_toast);
 
-  mat_rsrc_ptr toast(mat_rsrc_ptr resource);
+  /**
+   * Accepts a single material, and returns a toasted version.
+   *
+   * @param mat the material to be toasted. 
+   * @return the material having been toasted.
+   */
+  mat_rsrc_ptr toast(mat_rsrc_ptr mat);
 
+  /**
+   * sends any toast that has been ordered.
+   *
+   * @param orders is the list of orders to respond to.
+   */
   void sendToast(std::deque<msg_ptr> orders);
 
+  /** 
+   * performs cleanup activities at the end of the timestep
+   */
   void cleanUp();
 
+  /**
+   * initializes the expected change in composition during toasting, sensitive 
+   * to the toastiness_ parameter.
+   */
   void initToastChem();
 
 /* ------------------- */ 
