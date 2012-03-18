@@ -16,7 +16,17 @@ using namespace std;
  */
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-ToasterFacility::ToasterFacility() {};
+ToasterFacility::ToasterFacility() {
+  allowed_levels_.insert(make_pair("light",.50));
+  allowed_levels_.insert(make_pair("golden",.75));
+  allowed_levels_.insert(make_pair("dark",1));
+  allowed_levels_.insert(make_pair("burnt",1.25));
+  toast_bread_elt_ratio_.insert(make_pair(20,.91)); // Ca
+  toast_bread_elt_ratio_.insert(make_pair(26,.94)); // Fe
+  toast_bread_elt_ratio_.insert(make_pair(19,.90)); // K
+  toast_bread_elt_ratio_.insert(make_pair(12,.88)); // Mg
+  toast_bread_elt_ratio_.insert(make_pair(11,.91)); // Na
+};
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ToasterFacility::~ToasterFacility() {};
@@ -38,24 +48,22 @@ void ToasterFacility::init(xmlNodePtr cur) {
   // check that toastiness_ is oneof the allowed levels :
   // this gives an example of performing input checking in the module 
   // in case the xml parser is not detailed enough
-  set<string> allowed_levels;
-  allowed_levels.insert("light");
-  allowed_levels.insert("golden");
-  allowed_levels.insert("dark");
-  allowed_levels.insert("burnt");
-  if(allowed_levels.find(toastiness_)==allowed_levels.end()){
+  if(allowed_levels_.find(toastiness_)==allowed_levels_.end()){
     string msg = "The value given for the toastiness parameter, ";
     msg += toastiness_;
     msg += ", is not within the allowed set. Allowed values are: ";
-    set<string>::iterator it;
-    for (it=allowed_levels.begin(); it != allowed_levels.end(); it++){
+    map<string,double>::iterator it;
+    for (it=allowed_levels_.begin(); it != allowed_levels_.end(); it++){
       msg += " '";
-      msg += (*it);
+      msg += (*it).first;
       msg += "'";
     }
     msg+=".";
     LOG(LEV_ERROR,"Toast")<<msg;
   }
+
+  // initialize the toastiness dependent chemistry
+  initToastChem();
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
@@ -66,6 +74,8 @@ void ToasterFacility::copy(ToasterFacility* src) {
   rate_=src->rate_;
   incommodity_=src->incommodity_;
   outcommodity_=src->outcommodity_;
+  allowed_levels_=src->allowed_levels_;
+  toast_bread_elt_ratio_=src->toast_bread_elt_ratio_;
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
@@ -136,7 +146,7 @@ void ToasterFacility::addResource(msg_ptr msg, vector<rsrc_ptr> manifest) {
 void ToasterFacility::handleTick(int time) {
   makeRequests();
   makeOffers();
-  toast(stocks_);
+  inventory_.pushAll(toast(stocks_));
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -161,7 +171,41 @@ void ToasterFacility::makeOffers() {
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-void ToasterFacility::toast(DeckStore to_toast) { 
+void ToasterFacility::initToastChem() {
+  double lev = allowed_levels_[toastiness_];
+  map<int, double>::iterator ratio;
+  for (ratio=toast_bread_elt_ratio_.begin();ratio!=toast_bread_elt_ratio_.end(); ratio++){
+    comp_change_.insert( make_pair((*ratio).first, lev*(*ratio).second ));
+  }
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+vector<mat_rsrc_ptr> ToasterFacility::toast(DeckStore to_toast) { 
+  mat_rsrc_ptr slice;
+  vector<mat_rsrc_ptr> toRet;
+  while (to_toast.count() > 0) {
+    slice = to_toast.popOne();
+    toRet.push_back(toast(slice));
+  }
+  return toRet;
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+mat_rsrc_ptr ToasterFacility::toast(mat_rsrc_ptr resource){
+  IsoVector vec = resource->isoVector();
+  map<int, double> comp = vec.comp();
+  map<int, double>::iterator it;
+  int iso, elt;
+
+  for (it = comp.begin(); it != comp.end(); it++){
+    iso = (*it).first;
+    elt = IsoVector::getAtomicNum(iso);
+    if (comp_change_.find(elt) != comp_change_.end()){
+      comp[iso] = comp[iso]*comp_change_[elt];
+    }
+  }
+  mat_rsrc_ptr toRet = new Material(IsoVector(comp));
+  return  toRet;
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

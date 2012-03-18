@@ -2,10 +2,12 @@
 #if !defined(_TOASTERFACILITY_H)
 #define _TOASTERFACILITY_H
 
+#include <deque>
+#include <map>
+#include <vector>
 #include "Logger.h"
 #include "FacilityModel.h"
 #include "DeckStore.h"
-#include <deque>
 
 /**
   @class ToasterFacility
@@ -172,7 +174,8 @@ class ToasterFacility : public FacilityModel  {
   double rate_;
 
   /**
-   * The toastiness of the toast. This can be 
+   * The name referring to the toastiness of the toast. This can be any of the 
+   * allowed_levels_
    */
   std::string toastiness_;
 
@@ -201,15 +204,25 @@ class ToasterFacility : public FacilityModel  {
    */
   std::deque<msg_ptr> orders_waiting_;
 
+  std::map<std::string, double> allowed_levels_;
+
+  std::map<int, double> toast_bread_elt_ratio_;
+
+  std::map<int, double> comp_change_;
+
   void makeRequests();
 
   void makeOffers();
 
-  void toast(DeckStore to_toast);
+  std::vector<mat_rsrc_ptr> toast(DeckStore to_toast);
+
+  mat_rsrc_ptr toast(mat_rsrc_ptr resource);
 
   void sendToast(std::deque<msg_ptr> orders);
 
   void cleanUp();
+
+  void initToastChem();
 
 /* ------------------- */ 
 
