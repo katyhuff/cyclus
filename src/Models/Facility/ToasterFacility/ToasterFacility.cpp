@@ -128,7 +128,7 @@ vector<rsrc_ptr> ToasterFacility::removeResource(msg_ptr order) {
     throw CycException(err_msg);
   }
 
-  MatManifest materials;
+  Manifest materials;
   try {
     materials = inventory_.popQty(trans.resource->quantity());
   } catch(CycNegQtyException err) {
@@ -137,13 +137,13 @@ vector<rsrc_ptr> ToasterFacility::removeResource(msg_ptr order) {
                    << inventory_.quantity() << " kg.";
   }
 
-  return MatStore::toRes(materials);
+  return materials;
 
 }
     
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void ToasterFacility::addResource(msg_ptr msg, vector<rsrc_ptr> manifest) {
-  stocks_.pushAll(MatStore::toMat(manifest));
+  stocks_.pushAll(manifest);
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -186,9 +186,9 @@ void ToasterFacility::initToastChem() {
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-vector<mat_rsrc_ptr> ToasterFacility::toast(ResourceBuff to_toast) { 
-  mat_rsrc_ptr slice;
-  vector<mat_rsrc_ptr> toRet;
+vector<rsrc_ptr> ToasterFacility::toast(ResourceBuff to_toast) { 
+  rsrc_ptr slice;
+  vector<rsrc_ptr> toRet;
   while (to_toast.count() > 0) {
     slice = to_toast.popOne();
     toRet.push_back(toast(slice));
@@ -197,20 +197,27 @@ vector<mat_rsrc_ptr> ToasterFacility::toast(ResourceBuff to_toast) {
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-mat_rsrc_ptr ToasterFacility::toast(mat_rsrc_ptr resource){
-  IsoVector vec = resource->isoVector();
-  map<int, double> comp = vec.comp();
-  map<int, double>::iterator it;
-  int iso, elt;
+rsrc_ptr ToasterFacility::toast(rsrc_ptr resource){
 
-  for (it = comp.begin(); it != comp.end(); it++){
-    iso = (*it).first;
-    elt = IsoVector::getAtomicNum(iso);
-    if (comp_change_.find(elt) != comp_change_.end()){
-      comp[iso] = comp[iso]*comp_change_[elt];
+  rsrc_ptr toRet;
+
+  if (resource->type()==MATERIAL_RES){
+    IsoVector vec = boost::dynamic_pointer_cast<Material>(resource)->isoVector();
+    map<int, double> comp = vec.comp();
+    map<int, double>::iterator it;
+    int iso, elt;
+
+    for (it = comp.begin(); it != comp.end(); it++){
+      iso = (*it).first;
+      elt = IsoVector::getAtomicNum(iso);
+      if (comp_change_.find(elt) != comp_change_.end()){
+        comp[iso] = comp[iso]*comp_change_[elt];
+      }
     }
+    toRet = new Material(IsoVector(comp));
+  } else {
+    toRet = resource;
   }
-  mat_rsrc_ptr toRet = new Material(IsoVector(comp));
   return  toRet;
 }
 

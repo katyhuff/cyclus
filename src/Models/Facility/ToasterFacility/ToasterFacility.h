@@ -238,15 +238,15 @@ class ToasterFacility : public FacilityModel  {
    * @param to_toast is the ResourceBuff of materials to toast
    * @return a vector of toasted materials
    */
-  std::vector<mat_rsrc_ptr> toast(ResourceBuff to_toast);
+  std::vector<rsrc_ptr> toast(ResourceBuff to_toast);
 
   /**
    * Accepts a single material, and returns a toasted version.
    *
-   * @param mat the material to be toasted. 
-   * @return the material having been toasted.
+   * @param bread the resource (usually a material) to be toasted. 
+   * @return the resource (sometimes a material) having been toasted.
    */
-  mat_rsrc_ptr toast(mat_rsrc_ptr mat);
+  rsrc_ptr toast(rsrc_ptr bread);
 
   /**
    * sends any toast that has been ordered.
