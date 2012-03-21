@@ -162,7 +162,7 @@ class ToasterFacility : public FacilityModel  {
  * --------------------
  */
 
- private:
+ protected:
   /**
    * The number of slices the toaster can handle at one time
    */

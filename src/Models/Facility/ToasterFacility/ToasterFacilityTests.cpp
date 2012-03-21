@@ -16,7 +16,16 @@ using namespace std;
 class FakeToasterFacility : public ToasterFacility {
   public:
     FakeToasterFacility() : ToasterFacility() {
+      toastiness_="golden";
+      n_slices_=4;
+      rate_ = 2;
+      incommodity_="bread";
+      outcommodity_="toast";
+      initToastChem();
     }
+
+    string getInCommod(){ return incommodity_;}
+    string getOutCommod(){ return outcommodity_;}
 
     virtual ~FakeToasterFacility() {
     }
@@ -37,18 +46,30 @@ class ToasterFacilityTest : public ::testing::Test {
   protected:
     FakeToasterFacility* src_facility;
     FakeToasterFacility* new_facility; 
+      
+    TestMarket* in_market_; 
+    TestMarket* out_market_;
+
+mat_rsrc_ptr  bread_;
 
     virtual void SetUp(){
       src_facility = new FakeToasterFacility();
       src_facility->setParent(new TestInst());
       new_facility = new FakeToasterFacility();
       // for facilities that trade commodities, create appropriate markets here
+      out_market_ = new TestMarket(src_facility->getOutCommod());
+      in_market_ = new TestMarket(src_facility->getInCommod()); 
+      CompMap comp;
+      comp.insert(make_pair(20500,1));
+      bread_ = mat_rsrc_ptr(new Material(comp)); 
     };
 
     virtual void TearDown() {
       delete src_facility;
       delete new_facility;
       // for facilities that trade commodities, delete appropriate markets here
+      delete in_market_;
+      delete out_market_;
     }
 };
 
@@ -91,6 +112,23 @@ TEST_F(ToasterFacilityTest, Tock) {
   int time = 1;
   EXPECT_NO_THROW(src_facility->handleTick(time));
   // Test ToasterFacility specific behaviors of the handleTock function here
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+TEST_F(ToasterFacilityTest, Toast) {
+  mat_rsrc_ptr toasted_bread;
+  msg_ptr bread_msg_ = msg_ptr(new Message(new_facility));
+  bread_msg_->setResource(bread_);
+  bread_msg_->setNextDest(src_facility);
+  vector<rsrc_ptr> manifest, returned; 
+  manifest.push_back(rsrc_ptr(bread_));
+
+  double original_mass = (bread_->isoVector()).eltMass(20);
+  src_facility->addResource(bread_msg_, manifest);
+  src_facility->handleTock(1);
+  returned = src_facility->removeResource(bread_msg_);
+
+  ASSERT_LT((toasted_bread->isoVector()).eltMass(20),original_mass);
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
