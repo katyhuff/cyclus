@@ -62,6 +62,8 @@ void ToasterFacility::init(xmlNodePtr cur) {
     LOG(LEV_ERROR,"Toast")<<msg;
   }
 
+  inventory_.makeUnlimited();
+  stocks_.makeUnlimited();
   // initialize the toastiness dependent chemistry
   initToastChem();
 }
@@ -76,6 +78,8 @@ void ToasterFacility::copy(ToasterFacility* src) {
   outcommodity_=src->outcommodity_;
   allowed_levels_=src->allowed_levels_;
   toast_bread_elt_ratio_=src->toast_bread_elt_ratio_;
+  inventory_.makeUnlimited(); 
+  stocks_.makeUnlimited();
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
