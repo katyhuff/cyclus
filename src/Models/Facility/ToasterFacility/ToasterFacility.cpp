@@ -186,7 +186,7 @@ void ToasterFacility::initToastChem() {
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-vector<mat_rsrc_ptr> ToasterFacility::toast(DeckStore to_toast) { 
+vector<mat_rsrc_ptr> ToasterFacility::toast(ResourceBuff to_toast) { 
   mat_rsrc_ptr slice;
   vector<mat_rsrc_ptr> toRet;
   while (to_toast.count() > 0) {

@@ -7,7 +7,7 @@
 #include <vector>
 #include "Logger.h"
 #include "FacilityModel.h"
-#include "DeckStore.h"
+#include "ResourceBuff.h"
 
 /**
   @class ToasterFacility
@@ -192,12 +192,12 @@ class ToasterFacility : public FacilityModel  {
   /**
    * Not yet toasted bread in storage, waiting to be toasted
    */
-  DeckStore stocks_;
+  ResourceBuff stocks_;
 
   /**
    * Toasted bread, waiting to be offered and sent away
    */
-  DeckStore inventory_;
+  ResourceBuff inventory_;
 
   /**
    * Orders for toasted bread from other agents, waiting to be filled
@@ -232,13 +232,13 @@ class ToasterFacility : public FacilityModel  {
   void makeOffers();
 
   /**
-   * Accepts a DeckStore of materials to toast and returns a vector of toasted 
+   * Accepts a ResourceBuff of materials to toast and returns a vector of toasted 
    * materials. One to one.
    *
-   * @param to_toast is the DeckStore of materials to toast
+   * @param to_toast is the ResourceBuff of materials to toast
    * @return a vector of toasted materials
    */
-  std::vector<mat_rsrc_ptr> toast(DeckStore to_toast);
+  std::vector<mat_rsrc_ptr> toast(ResourceBuff to_toast);
 
   /**
    * Accepts a single material, and returns a toasted version.
