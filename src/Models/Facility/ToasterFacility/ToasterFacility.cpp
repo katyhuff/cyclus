@@ -26,10 +26,13 @@ ToasterFacility::ToasterFacility() {
   toast_bread_elt_ratio_.insert(make_pair(19,.90)); // K
   toast_bread_elt_ratio_.insert(make_pair(12,.88)); // Mg
   toast_bread_elt_ratio_.insert(make_pair(11,.91)); // Na
+  inventory_.makeUnlimited();
+  stocks_.makeUnlimited();
 };
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-ToasterFacility::~ToasterFacility() {};
+ToasterFacility::~ToasterFacility() {
+};
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
 void ToasterFacility::init(xmlNodePtr cur) {
@@ -62,8 +65,6 @@ void ToasterFacility::init(xmlNodePtr cur) {
     LOG(LEV_ERROR,"Toast")<<msg;
   }
 
-  inventory_.makeUnlimited();
-  stocks_.makeUnlimited();
   // initialize the toastiness dependent chemistry
   initToastChem();
 }
@@ -214,9 +215,9 @@ rsrc_ptr ToasterFacility::toast(rsrc_ptr resource){
         comp[iso] = comp[iso]*comp_change_[elt];
       }
     }
-    toRet = new Material(IsoVector(comp));
+    toRet = rsrc_ptr(new Material(IsoVector(comp)));
   } else {
-    toRet = resource;
+    toRet = rsrc_ptr(resource);
   }
   return  toRet;
 }
