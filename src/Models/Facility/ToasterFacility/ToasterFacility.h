@@ -119,6 +119,7 @@ class ToasterFacility : public FacilityModel  {
   virtual void addResource(msg_ptr msg,
                               std::vector<rsrc_ptr> manifest);
 
+
 /* ------------------- */ 
 
 

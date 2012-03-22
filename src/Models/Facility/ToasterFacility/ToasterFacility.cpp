@@ -130,13 +130,7 @@ vector<rsrc_ptr> ToasterFacility::removeResource(msg_ptr order) {
   }
 
   Manifest materials;
-  try {
-    materials = inventory_.popQty(trans.resource->quantity());
-  } catch(CycNegQtyException err) {
-    LOG(LEV_ERROR, "Toast") << "extraction of " << trans.resource->quantity()
-                   << " kg failed. Inventory is only "
-                   << inventory_.quantity() << " kg.";
-  }
+  materials = inventory_.popNum(1);
 
   return materials;
 

@@ -49,8 +49,8 @@ class ToasterFacilityTest : public ::testing::Test {
       
     TestMarket* in_market_; 
     TestMarket* out_market_;
-
-mat_rsrc_ptr  bread_;
+    
+    mat_rsrc_ptr  bread_;
 
     virtual void SetUp(){
       src_facility = new FakeToasterFacility();
@@ -60,7 +60,7 @@ mat_rsrc_ptr  bread_;
       out_market_ = new TestMarket(src_facility->getOutCommod());
       in_market_ = new TestMarket(src_facility->getInCommod()); 
       CompMap comp;
-      comp.insert(make_pair(20500,1));
+      comp.insert(make_pair(20500,1000));
       bread_ = mat_rsrc_ptr(new Material(comp)); 
     };
 
@@ -116,17 +116,20 @@ TEST_F(ToasterFacilityTest, Tock) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 TEST_F(ToasterFacilityTest, Toast) {
-  mat_rsrc_ptr toasted_bread;
-  msg_ptr bread_msg_ = msg_ptr(new Message(new_facility));
+
+  msg_ptr bread_msg_ = msg_ptr(new Message(new_facility, src_facility));
   bread_msg_->setResource(bread_);
-  bread_msg_->setNextDest(src_facility);
+  bread_msg_->setCommod("bread");
+
   vector<rsrc_ptr> manifest, returned; 
   manifest.push_back(rsrc_ptr(bread_));
+  src_facility->addResource(bread_msg_, manifest);
 
   double original_mass = (bread_->isoVector()).eltMass(20);
-  src_facility->addResource(bread_msg_, manifest);
-  src_facility->handleTock(1);
+  src_facility->handleTick(1);
+  bread_msg_->setCommod("toast");
   returned = src_facility->removeResource(bread_msg_);
+  mat_rsrc_ptr toasted_bread = boost::dynamic_pointer_cast<Material>(returned.front());
 
   ASSERT_LT((toasted_bread->isoVector()).eltMass(20),original_mass);
 }
