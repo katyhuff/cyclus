@@ -1,0 +1,21 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0"
+datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+
+<define name="ToasterFacility">
+  <element name="ToasterFacility"> 
+    <element name="nSlices">
+      <data type="nonNegativeInteger"/>
+    </element>
+    <element name="toastiness">
+      <data type="string"/>
+    </element>
+    <element name="rate">
+      <data type="double"/>
+    </element>
+    <ref name="incommodity"/>
+    <ref name="outcommodity"/>
+  </element>
+</define>
+
+</grammar>
