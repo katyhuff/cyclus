@@ -8,6 +8,7 @@
 #include "Logger.h"
 #include "FacilityModel.h"
 #include "ResourceBuff.h"
+#include "Table.h"
 
 /**
   @class ToasterFacility
@@ -268,6 +269,31 @@ class ToasterFacility : public FacilityModel  {
   void initToastChem();
 
 /* ------------------- */ 
+
+// -------- output database related members  -------- 
+ public:
+  /**
+   *   the toaster database table
+   */
+  static table_ptr toaster_table;
+
+ private:
+  /**
+   *  Define the database table on the first toasting event
+   */
+  static void define_table();
+
+  /**
+   *   add some toast to the toast table
+   */
+  void addToTable();
+
+  /**
+     Each time a slice of toast is made, we keep track of that
+     toast's id (in order to make some output).
+   */
+  int current_toast_id_;
+// -------- output database related members  --------   
 
 };
 

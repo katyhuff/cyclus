@@ -7,8 +7,12 @@
 #include "Logger.h"
 #include "InputXML.h"
 #include "Timer.h"
+#include "GenericResource.h"
 
 using namespace std;
+
+// Database table for toast
+table_ptr ToasterFacility::toaster_table = new Table("ToastedResources"); 
 
 /* --------------------
  * all MODEL classes have these members
@@ -32,6 +36,7 @@ ToasterFacility::ToasterFacility() {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ToasterFacility::~ToasterFacility() {
+ToasterFacility::~ToasterFacility() {  
 };
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
@@ -67,6 +72,9 @@ void ToasterFacility::init(xmlNodePtr cur) {
 
   // initialize the toastiness dependent chemistry
   initToastChem();
+
+  // we haven't toasted anything yet
+  current_toast_id_ = -1;
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
@@ -81,6 +89,7 @@ void ToasterFacility::copy(ToasterFacility* src) {
   toast_bread_elt_ratio_=src->toast_bread_elt_ratio_;
   inventory_.makeUnlimited(); 
   stocks_.makeUnlimited();
+  current_toast_id_ = -1;
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
@@ -143,9 +152,16 @@ void ToasterFacility::addResource(msg_ptr msg, vector<rsrc_ptr> manifest) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void ToasterFacility::handleTick(int time) {
+  LOG(LEV_INFO3, "Toast ") << facName() << " is ticking {";
   makeRequests();
   makeOffers();
-  inventory_.pushAll(toast(stocks_));
+  inventory_.pushAll(toast(stocks_)); 
+
+  // log the fact that we just made toast
+  current_toast_id_ = TI->time();
+  addToTable();
+ 
+  LOG(LEV_INFO3, "Toast ") << "}";
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -163,7 +179,6 @@ void ToasterFacility::handleTock(int time) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void ToasterFacility::makeRequests() { 
-
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -193,6 +208,8 @@ vector<rsrc_ptr> ToasterFacility::toast(ResourceBuff to_toast) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 rsrc_ptr ToasterFacility::toast(rsrc_ptr resource){
+  
+  LOG(LEV_DEBUG4,"Toast")<<"Toaster " << this->ID() << " made some toast!";
 
   rsrc_ptr toRet;
 
@@ -213,6 +230,8 @@ rsrc_ptr ToasterFacility::toast(rsrc_ptr resource){
   } else {
     toRet = rsrc_ptr(resource);
   }
+  
+  // return our toast
   return  toRet;
 }
 
@@ -235,3 +254,39 @@ extern "C" Model* constructToasterFacility() {
 
 /* ------------------- */ 
 
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void ToasterFacility::define_table() {
+  // declare the table columns
+  column toaster_id("ID","INTEGER");
+  column time("Time","INTEGER");
+  column toasted_rsrc_id("ToastedRsrcID","INTEGER");  
+  // declare the table's primary key
+  primary_key pk;
+  pk.push_back("ID"), pk.push_back("ToastedRsrcID");
+  toaster_table->setPrimaryKey(pk);
+  // add columns to the table
+  toaster_table->addColumn(toaster_id);
+  toaster_table->addColumn(time);
+  toaster_table->addColumn(toasted_rsrc_id);
+  // we've now defined the table
+  toaster_table->tableDefined();
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void ToasterFacility::addToTable(){
+  // if we haven't logged some toast yet, define the table
+  if ( !toaster_table->defined() ) {
+    ToasterFacility::define_table();
+  }
+  // make a row
+  // declare data
+  data an_id( this->ID() ), a_time( TI->time() ), 
+    a_rsrc_id( this->current_toast_id_ );
+  // declare entries
+  entry id("ID",an_id), time("Time",a_time), rid("ToastedRsrcID",a_rsrc_id);
+  // declare row
+  row aRow;
+  aRow.push_back(id), aRow.push_back(time), aRow.push_back(rid);
+  // add the row
+  toaster_table->addRow(aRow);
+}

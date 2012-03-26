@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!-- 1 ToasterFacility, 1 StubRegion, 1 FixedInst, and 1 StubMarket -->
+<simulation>
+  <duration>10</duration>
+  <startmonth>1</startmonth>
+  <startyear>2000</startyear>
+  <simstart>0</simstart>
+  <decay>2</decay>
+
+  <commodity>
+    <name>bread</name>
+  </commodity>
+
+  <commodity>
+    <name>toast</name>
+  </commodity>
+
+  <market>
+    <name>breadMarket</name>
+    <mktcommodity>bread</mktcommodity>
+    <model>
+      <StubMarket/>
+    </model>
+  </market>
+
+  <market>
+    <name>toastMarket</name>
+    <mktcommodity>toast</mktcommodity>
+    <model>
+      <StubMarket/>
+    </model>
+  </market>
+
+  <facility>
+    <name>FrontEnd</name>
+    <model>
+      <ToasterFacility>
+        <nSlices>4</nSlices>
+        <toastiness>dark</toastiness>
+        <rate>2.0</rate>
+        <incommodity>bread</incommodity>
+        <outcommodity>toast</outcommodity>
+      </ToasterFacility>
+    </model>
+  </facility>
+
+  <region>
+    <name>oneRegion</name>
+    <allowedfacility>FrontEnd</allowedfacility>
+    <model>
+      <NullRegion/>
+    </model>
+    <institution>
+      <name>oneInst</name>
+      <model>
+        <FixedInst>
+          <facility>
+            <type>FrontEnd</type>
+            <name>FrontEnd</name>
+          </facility>
+        </FixedInst>
+      </model>
+    </institution>
+  </region>
+
+</simulation>
