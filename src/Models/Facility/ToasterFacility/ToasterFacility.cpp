@@ -36,7 +36,6 @@ ToasterFacility::ToasterFacility() {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ToasterFacility::~ToasterFacility() {
-ToasterFacility::~ToasterFacility() {  
 };
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
