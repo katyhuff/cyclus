@@ -5,17 +5,19 @@ import subprocess
 from subprocess import Popen, PIPE, STDOUT
 import os
 import re
- 
+import argparse
+
+
 def main():
     """This function finds input files, runs them, and prints a summary"""
-    flag = check_inputs()
+    args = check_inputs()
     input_path = "@input_path@"
     cyclus_path =  "@cyclus_path@/cyclus"
-    files, catalogs, catalognames = get_files(input_path)
+    files, catalogs, catalognames = get_files(input_path,args)
     copy_catalogs(catalogs,cyclus_path.strip("cyclus"))
     summ = Summary()
     for name in files :
-        file_to_test = TestFile(cyclus_path, name, flag) 
+        file_to_test = TestFile(cyclus_path, name, args.verb) 
         file_to_test.run()
         summ.add_to_summary(file_to_test)
     clean_catalogs(cyclus_path.strip("cyclus"),catalognames)
@@ -23,36 +25,18 @@ def main():
 
 def check_inputs():
     """This function checks the input arguments"""
-    if len(sys.argv) > 2: 
-        print_usage()
-        sys.exit(1) 
-    elif len(sys.argv) == 2:
-        if re.search("-v*",sys.argv[1]):
-            flag = sys.argv[1]
-        else : 
-            print_usage()
-            sys.exit(1)
-    elif len(sys.argv) == 1 :
-        flag = "-v0"
-    return flag
+    parser = argparse.ArgumentParser(description='This script finds and runs \
+            input files')
+    parser.add_argument('-filter',action="store", dest="directory", 
+            default="", type=str, help="Filter which inputs to run by naming a \
+            subdirectory")
+    parser.add_argument('-v',action="store", dest="verb", default=0,type=int, 
+            help="output log verbosity can be integer (0-11) or text \
+            (LEV_ERROR, LEV_WARN, LEV_DEBUG1-LEV_DEBUG5")
+    results = parser.parse_args()
+    return results
 
-def print_usage() :
-    """This prints the proper way to treat the command line interface"""
-    print 'Usage: python run_inputs.py\n' + \
-            'Allowed Options : \n' + \
-            '-v arg                    output log verbosity. \n' + \
-            '                    \
-            Can be text: \n' + \
-            '                    \
-              LEV_ERROR (least verbose, default), LEV_WARN,\n' + \
-            '                    \
-              LEV_INFO1 (through 5), and LEV_DEBUG1 (through 5).\n' + \
-            '                    \
-            Or an integer:\n'+ \
-            '                    \
-              0 (LEV_ERROR equiv) through 11 (LEV_DEBUG5 equiv)\n'
- 
-def get_files(path):
+def get_files(path, args):
     """This function walks the 'path' tree and finds input files"""
     catalogs=[]
     catalognames=[]
@@ -60,16 +44,18 @@ def get_files(path):
     for root, dirs, files in os.walk(path, followlinks=True):
         if '.git' in dirs:
             dirs.remove('.git')
-        for name in files: 
-            if re.search("\.xml",name) :
-                if re.search("recipebook",name) or \
-                        re.search("facilitycatalog",name):
-                    catalogs.append(os.path.join(root,name))
-                    catalognames.append(name)
-                else : 
-                    inputs.append(os.path.join(root, name))
-            else :
-                files.remove(name)
+        for directory in dirs :
+            if re.search(args.directory, directory) : 
+                for name in files: 
+                    if re.search("\.xml",name) :
+                        if re.search("recipebook",name) or \
+                                re.search("facilitycatalog",name):
+                            catalogs.append(os.path.join(root,name))
+                            catalognames.append(name)
+                        else : 
+                            inputs.append(os.path.join(root, name))
+                    else :
+                        files.remove(name)
     print "The catalogs to be moved are:"
     print catalogs
     print "The files to be tested are:"
@@ -111,11 +97,11 @@ class Summary():
 
 class TestFile():
     """An object representing the inputxml file to test"""
-    def __init__(self, cyclus_path, file_path, flag):
+    def __init__(self, cyclus_path, file_path, verb):
         self.infile = file_path 
         self.cyclus_path = cyclus_path 
         self.passed=True
-        self.flag = " "+flag+" "
+        self.flag = " -v"+str(verb)+" "
   
     def run(self):
         """Runs all of the input file tests"""
