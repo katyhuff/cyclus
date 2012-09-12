@@ -162,6 +162,30 @@ TEST_F(MaterialTest, AbsorbLikeMaterial) {
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
+TEST_F(MaterialTest, AbsorbIntoZeroMat) {
+  mat_rsrc_ptr zero_test_mat;
+  zero_test_mat = mat_rsrc_ptr(new Material(test_comp_));
+  zero_test_mat->setQuantity(0);
+  double orig = zero_test_mat->quantity();
+  ASSERT_EQ(0,orig);
+  ASSERT_NO_THROW(zero_test_mat->absorb(test_mat_));
+  EXPECT_FLOAT_EQ(test_size_, zero_test_mat->quantity());
+  EXPECT_NE(orig, zero_test_mat->quantity());
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
+TEST_F(MaterialTest, AbsorbZeroMat) {
+  mat_rsrc_ptr zero_test_mat;
+  zero_test_mat = mat_rsrc_ptr(new Material(test_comp_));
+  zero_test_mat->setQuantity(0);
+  double orig = zero_test_mat->quantity();
+  ASSERT_EQ(0,orig);
+  ASSERT_NO_THROW(test_mat_->absorb(zero_test_mat));
+  EXPECT_FLOAT_EQ(test_size_, test_mat_->quantity());
+  EXPECT_NE(orig, test_mat_->quantity());
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
 TEST_F(MaterialTest, AbsorbUnLikeMaterial) {
   // make a number of materials masses 1, 2, and 10 
   mat_rsrc_ptr same_as_orig_test_mat = mat_rsrc_ptr(new Material(test_comp_));
