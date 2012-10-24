@@ -219,12 +219,6 @@ datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
       </element>
   </define>
 
-  <define name="componenttype">
-      <element name="componenttype">
-        <data type="string"/>
-      </element>
-  </define>
-
   <define name="incommodity">
       <element name="incommodity">
           <text/>
