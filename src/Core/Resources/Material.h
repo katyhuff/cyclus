@@ -300,11 +300,6 @@ private:
   static std::list<Material*> materials_;
 
   /**
-     true if decay should occur, false if not. 
-   */
-  static bool decay_wanted_;
-
-  /**
      how many months between decay calculations 
    */
   static int decay_interval_;

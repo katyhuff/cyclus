@@ -14,8 +14,6 @@ using namespace boost;
 
 list<Material*> Material::materials_;
 
-bool Material::decay_wanted_ = false;
-
 int Material::decay_interval_ = 1;
 
 bool Material::type_is_recorded_ = false;
