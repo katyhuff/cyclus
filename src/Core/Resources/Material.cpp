@@ -72,7 +72,9 @@ void Material::absorb(mat_rsrc_ptr matToAdd) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 mat_rsrc_ptr Material::extract(double mass) {
-  if(quantity_ < mass){
+  if (mass < 0) {
+    throw CycNegativeValueException("Can't remove a negative amoutn of material");
+  } else if(quantity_ < mass){
     string err = "The mass ";
     err += mass;
     err += " cannot be extracted from Material with ID ";
@@ -96,6 +98,9 @@ mat_rsrc_ptr Material::extract(double mass) {
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 mat_rsrc_ptr Material::extract(const CompMapPtr remove_comp, double remove_amt, MassUnit unit) {
   
+  if (remove_amt < 0) 
+    throw CycNegativeValueException("Can't remove a negative amoutn of material");
+
   CompMapPtr final_comp = CompMapPtr(this->unnormalizeComp(MASS));
   remove_comp->massify();
   assert(!final_comp->normalized());
