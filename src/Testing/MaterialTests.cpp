@@ -224,6 +224,12 @@ TEST_F(MaterialTest, ExtractMass) {
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
+TEST_F(MaterialTest, ExtractNegMass) {
+  mat_rsrc_ptr m;
+  EXPECT_THROW(m = test_mat_->extract(-1),CycNegativeValueException); 
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
 TEST_F(MaterialTest, Extract_complete) {
 
   // Complete extraction
@@ -232,6 +238,13 @@ TEST_F(MaterialTest, Extract_complete) {
   EXPECT_TRUE( m1->isoVector().compEquals(test_comp_));
   EXPECT_FLOAT_EQ( 0, test_mat_->quantity() );
   EXPECT_FLOAT_EQ( test_size_, m1->quantity() );
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
+TEST_F(MaterialTest, ExtractNegComp) {
+  mat_rsrc_ptr m;
+  EXPECT_THROW(m = test_mat_->extract(test_comp_,-1),
+               CycNegativeValueException);
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
