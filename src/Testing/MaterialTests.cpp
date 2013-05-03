@@ -211,21 +211,19 @@ TEST_F(MaterialTest, AbsorbUnLikeMaterial) {
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
-TEST_F(MaterialTest, ExtractMass) {
-  double amt = test_size_ / 3;
-  double diff = test_size_ - amt;  
-  mat_rsrc_ptr extracted;
-  EXPECT_FLOAT_EQ(test_mat_->quantity(),test_size_); // we expect this amt
-  EXPECT_NO_THROW(extracted = test_mat_->extract(amt)); // extract an amt
-  EXPECT_FLOAT_EQ(extracted->quantity(),amt); // check correctness
-  EXPECT_FLOAT_EQ(test_mat_->quantity(),diff); // check correctness
-  EXPECT_EQ(test_mat_->isoVector(),extracted->isoVector());
-  EXPECT_THROW(two_test_mat_->extract(2*two_test_mat_->quantity()), CycException);
+TEST_F(MaterialTest, ExtractNegMass) {
+  double amt = -1;
+  EXPECT_THROW(test_mat_->extract(amt),CycNegativeValueException);
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
+TEST_F(MaterialTest, ExtractNegMassComp) {
+  double amt = -1;
+  EXPECT_THROW(test_mat_->extract(test_comp_,amt),CycNegativeValueException);
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
 TEST_F(MaterialTest, Extract_complete) {
-
   // Complete extraction
   mat_rsrc_ptr m1;
   EXPECT_NO_THROW( m1 = test_mat_->extract(test_comp_, test_size_));

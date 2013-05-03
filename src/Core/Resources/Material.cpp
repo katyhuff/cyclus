@@ -72,6 +72,9 @@ void Material::absorb(mat_rsrc_ptr matToAdd) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 mat_rsrc_ptr Material::extract(double mass) {
+  if (mass < 0)
+    throw CycNegativeValueException("Can't extract negative mass.");
+
   if(quantity_ < mass){
     string err = "The mass ";
     err += mass;
@@ -95,6 +98,8 @@ mat_rsrc_ptr Material::extract(double mass) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 mat_rsrc_ptr Material::extract(const CompMapPtr remove_comp, double remove_amt, MassUnit unit) {
+  if (remove_amt < 0)
+    throw CycNegativeValueException("Can't extract negative mass.");
   
   CompMapPtr final_comp = CompMapPtr(this->unnormalizeComp(MASS));
   remove_comp->massify();
