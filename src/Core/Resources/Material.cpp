@@ -72,6 +72,9 @@ void Material::absorb(mat_rsrc_ptr matToAdd) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 mat_rsrc_ptr Material::extract(double mass) {
+  if (mass < 0)
+    throw CycNegativeValueException("Can't extract negative mass.");
+
   if(quantity_ < mass){
     string err = "The mass ";
     err += mass;
@@ -95,6 +98,8 @@ mat_rsrc_ptr Material::extract(double mass) {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 mat_rsrc_ptr Material::extract(const CompMapPtr remove_comp, double remove_amt, MassUnit unit) {
+  if (remove_amt < 0)
+    throw CycNegativeValueException("Can't extract negative mass.");
   
   CompMapPtr final_comp = CompMapPtr(this->unnormalizeComp(MASS));
   remove_comp->massify();
@@ -109,7 +114,7 @@ mat_rsrc_ptr Material::extract(const CompMapPtr remove_comp, double remove_amt, 
        << " of a something from a material that has " 
        << original_amt << " of something." << endl;
     throw CycNegativeValueException(ss.str());
-  } else if (final_amt <= 0) {final_amt = 0;}
+  } else if (final_amt <= cyclus::eps_rsrc()) {final_amt = 0;}
 
   int iso;
   double remove_amt_i, final_amt_i;
