@@ -217,11 +217,12 @@ public:
      the quantity_ and iso_vector_ members.
       
      @param comp_to_rem the composition of material that will be removed against this Material. 
-     @param kg_to_rem the amount in kg of material that will be removed against this Material. 
+     @param amt_to_rem the amount in *unit* of material that will be removed against this Material. 
+     @param unit the MassUnit to do the extraction operation in. Default is KG. 
      @throws CycNegativeValueException for overextraction events
      @return the extracted material as a newly allocated material object
    */
-  virtual mat_rsrc_ptr extract(const CompMapPtr comp_to_rem, double kg_to_rem);
+  virtual mat_rsrc_ptr extract(const CompMapPtr comp_to_rem, double amt_to_rem, MassUnit unit=KG);
 
   /**
      Extracts a specified mass from this material creating a new 
@@ -334,12 +335,7 @@ private:
 // -------- resource class related members  -------- 
 
 
-// -------- output database related members  -------- 
  public:
-  /**
-     the table for recording material resources 
-   */
-  static table_ptr material_table;
 
   /**
      add a material to table 
@@ -351,17 +347,6 @@ private:
    */
   virtual int stateID() {return iso_vector_.comp()->ID();}
 
- private:
-  /**
-     Define the database table 
-   */
-  static void define_table();
-
-  /**
-     Store information about the material's primary key 
-   */
-  primary_key_ref pkref_;
-// -------- output database related members  -------- 
 };
 
 #endif

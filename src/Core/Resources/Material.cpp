@@ -2,6 +2,7 @@
 #include "Material.h"
 
 #include "CycException.h"
+#include "CycLimits.h"
 #include "Timer.h"
 #include "Logger.h"
 
@@ -18,13 +19,11 @@ bool Material::decay_wanted_ = false;
 
 int Material::decay_interval_ = 1;
 
-table_ptr Material::material_table = table_ptr(new Table("MaterialHistory")); 
-
 bool Material::type_is_recorded_ = false;
-
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
 Material::Material() {
+  setQuantity(0);
   last_update_time_ = TI->time();
   CLOG(LEV_INFO4) << "Material ID=" << ID_ << " was created.";
   materials_.push_back(this);
@@ -37,6 +36,7 @@ Material::~Material() {
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
 Material::Material(CompMapPtr comp) {
+  setQuantity(0);
   IsoVector vec = IsoVector(comp);
   last_update_time_ = TI->time();
   iso_vector_ = vec;
@@ -63,7 +63,8 @@ void Material::absorb(mat_rsrc_ptr matToAdd) {
   // @gidden figure out how to handle this with the database - mjg
   // Get the given Material's composition.
   double amt = matToAdd->quantity();
-  iso_vector_.mix(matToAdd->isoVector(),quantity_/amt); // @MJG_FLAG this looks like it copies isoVector()... should this return a pointer?
+  double ratio = ((quantity_ < cyclus::eps_rsrc()) ? 1 : quantity_/amt);
+  iso_vector_.mix(matToAdd->isoVector(),ratio); // @MJG_FLAG this looks like it copies isoVector()... should this return a pointer?
   quantity_ += amt;
   CLOG(LEV_DEBUG2) << "Material ID=" << ID_ << " absorbed material ID="
                    << matToAdd->ID() << ".";
@@ -93,43 +94,51 @@ mat_rsrc_ptr Material::extract(double mass) {
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-mat_rsrc_ptr Material::extract(const CompMapPtr comp_to_rem, double kg_to_rem) {
+mat_rsrc_ptr Material::extract(const CompMapPtr comp_to_rem, double amt_to_rem, MassUnit unit) {
  
   CompMapPtr new_comp = CompMapPtr(this->unnormalizeComp(MASS));
-  assert(!new_comp->normalized());
   CompMapPtr remove_comp = comp_to_rem;
   remove_comp->massify();
+  assert(!new_comp->normalized());
   assert(remove_comp->normalized());
-  double remainder_kg, new_kg, kg_to_rem_i;
-  remainder_kg = this->quantity();
+
+  double new_amt, amt_to_rem_i, remainder_amt, remainder_amt_i;
+  remainder_amt = this->mass(unit);
+
   int iso;
 
   for (CompMap::iterator it = remove_comp->begin(); 
        it != remove_comp->end(); it++) {
-    // reduce isotope, if it exists in new_comp
-    kg_to_rem_i = it->second * kg_to_rem;
+    // get isotopic information
+    amt_to_rem_i = it->second * amt_to_rem;
+    if ( amt_to_rem_i <= cyclus::eps_rsrc() ) { amt_to_rem_i = 0; };
     iso = it->first;
-    if ( this->mass(iso) >= kg_to_rem_i ) {
-      (*new_comp)[iso] = this->mass(iso) - kg_to_rem_i;
-      new_kg += kg_to_rem_i;
-      remainder_kg -= kg_to_rem_i;
-    } else {
-    stringstream ss("");
-    ss << "The Material " << this->ID() 
-      << " has insufficient material to extract the isotope : "
-      << iso ;
-    throw CycNegativeValueException(ss.str());
+    remainder_amt_i = this->mass(iso, unit) - amt_to_rem_i;
+
+    // check information
+    if ( remainder_amt_i < -cyclus::eps_rsrc() ) {
+      stringstream ss;
+      ss << "The Material " << this->ID() 
+         << " has insufficient material to extract the isotope : " << iso ;
+      throw CycNegativeValueException(ss.str());
+    } else if (remainder_amt_i <= cyclus::eps_rsrc()) {
+      remainder_amt_i = 0; 
     }
+    
+    // operate on information
+    (*new_comp)[iso] = remainder_amt_i;
+    new_amt += amt_to_rem_i;
+    remainder_amt -= amt_to_rem_i;
   }
 
   // make new material
   mat_rsrc_ptr new_mat = mat_rsrc_ptr(new Material(comp_to_rem));
-  new_mat->setQuantity(new_kg, KG);
+  new_mat->setQuantity(new_amt, unit);
   new_mat->setOriginalID( this->originalID() ); // book keeping
   
   // adjust old material
   this->iso_vector_ = IsoVector(new_comp); 
-  this->setQuantity(remainder_kg, KG);
+  this->setQuantity(remainder_amt, unit);
 
   CLOG(LEV_DEBUG2) << "Material ID=" << ID_ << " had composition extracted.";
 
