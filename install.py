@@ -53,6 +53,8 @@ def install_cyclus(args):
             cmake_cmd += ['-DCOIN_ROOT_DIR=' + absexpanduser(args.coin_root)]
         if args.boost_root:
             cmake_cmd += ['-DBOOST_ROOT=' + absexpanduser(args.boost_root)]
+        if args.tuplefix:
+            cmake_cmd += ['-DGTEST_USE_OWN_TR1_TUPLE=1']
         check_windows_cmake(cmake_cmd)
         rtn = subprocess.check_call(cmake_cmd, cwd=args.build_dir,
                                     shell=(os.name == 'nt'))
@@ -118,6 +120,9 @@ def main():
     cmake_prefix_path = "the cmake prefix path for use with FIND_PACKAGE, " + \
         "FIND_PATH, FIND_PROGRAM, or FIND_LIBRARY macros"
     parser.add_argument('--cmake_prefix_path', help=cmake_prefix_path)
+
+    tuplefix = "use this flag if tr1/tuple isn't being found by gtest"
+    parser.add_argument('--use-own-tr1-tuple', help=tuplefix)
 
     args = parser.parse_args()
     if args.uninstall:
