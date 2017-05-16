@@ -337,6 +337,24 @@ IF(NOT CYCLUS_DOC_ONLY)
                         OUTPUT_VARIABLE core_version
                         OUTPUT_STRIP_TRAILING_WHITESPACE)
     ENDIF(NOT "${CORE_VERSION}" STREQUAL "")
+
+
+    ##################################################################
+    #########Changes to remove version issue##########################
+    ##################################################################
+    IF("${core_version}" STREQUAL "")
+        EXECUTE_PROCESS (
+                        COMMAND python ${PROJECT_SOURCE_DIR}/new.py
+                        OUTPUT_VARIABLE new_core_version
+                        )
+        SET(core_version "${new_core_version}")
+    ENDIF()
+    #SET(ENV{CYCLUS_CORE_VERSION} "${core_version}")
+    #MESSAGE("-- core version ($CYCLUS_CORE_VERSION) set to: my ${new_core_version}")  #to debug
+    ###################################################################
+
+
+
     IF("${core_version}" STREQUAL "")
         MESSAGE(WARNING "Unable to read current core version, falling back to previous version. Core version will be set to -1")
         SET(core_version "-1")
