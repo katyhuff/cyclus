@@ -154,7 +154,7 @@ def prepare_type(cpptype, othertype):
 # pass 1
 #
 def preprocess_file(filename, includes=(), cpp_path=sys_cpp,
-                    cpp_args=('-xc++', '-pipe', '-E', '-DCYCPP')):
+                    cpp_args=('-x', 'c++', '-pipe', '-E', '-DCYCPP')):
     """Preprocess a file using cpp.
 
     Parameters

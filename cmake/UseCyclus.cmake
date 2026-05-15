@@ -92,10 +92,13 @@ MACRO(USE_CYCLUS lib_root src_root)
     # Now check first if the $CPP enrironment variable is defined, if not
     # fallback on the previous behavior, so in order:
     #   1- if defined, uses ${CPP}
-    #   2- if clang++ is present, uses it
+    #   2- if AppleClang is present, uses it
+    #   3- if clang++ is present, uses that
     #   3- otherwise, uses cpp
     IF(DEFINED ENV{CPP})
         SET(SYS_CPP "$ENV{CPP}")
+    ELSEIF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+        SET(SYS_CPP "${CMAKE_CXX_COMPILER}")
     ELSEIF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         SET(SYS_CPP "clang++")
     ELSE()
