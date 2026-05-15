@@ -149,13 +149,34 @@ IF(NOT CYCLUS_DOC_ONLY)
     pkg_check_modules(LIBXMLXX IMPORTED_TARGET libxml++-5.0)
     IF ( NOT LIBXMLXX_FOUND )
        pkg_check_modules(LIBXMLXX IMPORTED_TARGET libxml++-4.0)
+    ENDIF ( NOT LIBXMLXX_FOUND )
     IF (NOT LIBXMLXX_FOUND )
        pkg_check_modules(LIBXMLXX REQUIRED IMPORTED_TARGET libxml++-2.6)
     ENDIF ( NOT LIBXMLXX_FOUND )
     SET(LIBS ${LIBS} PkgConfig::LIBXMLXX)
     message("-- LibXML++ Include Dir: ${LIBXMLXX_INCLUDE_DIRS}")
     message("-- LibXML++ Libraries: ${LIBXMLXX_LIBRARIES}")
-    
+
+    set(GLIBMM_MODULE_CANDIDATES
+    glibmm-2.88
+    glibmm-2.68
+    glibmm-2.4
+    )
+
+    foreach(_glibmm_mod ${GLIBMM_MODULE_CANDIDATES})
+        pkg_check_modules(GLIBMM QUIET IMPORTED_TARGET ${_glibmm_mod})
+        if(GLIBMM_FOUND)
+            message(STATUS "Found glibmm via pkg-config module: ${_glibmm_mod}")
+            break()
+        endif()
+    endforeach()
+
+    if(NOT GLIBMM_FOUND)
+        message(FATAL_ERROR "Could not find glibmm. Tried: ${GLIBMM_MODULE_CANDIDATES}")
+    endif()
+
+    SET(LIBS ${LIBS} PkgConfig::GLIBMM)
+
     # find lapack and link to it
     FIND_PACKAGE(LAPACK REQUIRED)
     set(LIBS ${LIBS} ${LAPACK_LIBRARIES})
