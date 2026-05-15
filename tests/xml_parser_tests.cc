@@ -4,6 +4,7 @@
 #include <fstream>
 #include <gtest/gtest.h>
 #include <libxml++/libxml++.h>
+#include <glibmm/ustring.h>
 
 #include "error.h"
 
