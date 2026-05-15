@@ -146,8 +146,10 @@ IF(NOT CYCLUS_DOC_ONLY)
     message("-- LibXML2 Libraries: ${LIBXML2_LIBRARIES}")
 
     # Then use pkg-config for locate specific package
-    pkg_check_modules(LIBXMLXX IMPORTED_TARGET libxml++-4.0)
+    pkg_check_modules(LIBXMLXX IMPORTED_TARGET libxml++-5.0)
     IF ( NOT LIBXMLXX_FOUND )
+       pkg_check_modules(LIBXMLXX IMPORTED_TARGET libxml++-4.0)
+    IF (NOT LIBXMLXX_FOUND )
        pkg_check_modules(LIBXMLXX REQUIRED IMPORTED_TARGET libxml++-2.6)
     ENDIF ( NOT LIBXMLXX_FOUND )
     SET(LIBS ${LIBS} PkgConfig::LIBXMLXX)
